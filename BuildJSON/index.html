@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+		<title>JSON Builder</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta name="author" content="Murali Krishna Tananki" />
+        
+        <style>
+            html,
+            body {
+            padding: 0;
+            margin: 0;
+            font-size: 12px;
+            font-family: sans-serif;
+            }
+
+            * {
+            box-sizing: border-box;
+            }
+
+            .container {
+            margin: 15px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            background: #fff;
+            overflow: hidden;
+            }
+
+            .input-group {
+            width: 30%;
+            float: left;
+            padding: 10px;
+            }
+
+            .input-group label {
+            display: block;
+            padding-bottom: 5px;
+            }
+
+            .hint {
+            color: #666;
+            font-style: italic;
+            margin: 0;
+            }
+
+            .input-group select {
+            width: 100%;
+            height: 33px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            }
+
+            .input-group input {
+            width: 100%;
+            height: 33px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            padding: 4px;
+            }
+
+            .btn {
+            border: 1px solid #ccc;
+            text-align: center;
+            height: 33px;
+            width: 33px;
+            background: #eee;
+            line-height: 33px;
+            display: inline-block;
+            text-decoration: none;
+            color: #000;
+            font-size: 26px;
+            border-radius: 4px;
+            }
+
+            .add-input {
+            position: relative;
+            padding-right: 36px;
+            }
+
+            .add-input > .btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            }
+
+            .btn-container {
+            clear: both;
+            padding: 15px;
+            text-align: center;
+            }
+
+            .main-btn {
+            font-weight: bold;
+            padding: 10px 25px;
+            background: #06f;
+            color: #fff;
+            border: 2px solid rgba(0, 102, 255, 0.5);
+            border-radius: 6px;
+            cursor: pointer;
+            }
+
+            .main-btn:hover {
+            color: #06f;
+            border: 2px solid rgba(0, 102, 255, 1);
+            background: rgba(0, 102, 255, 0.5);
+            }
+
+            .add-input {
+            width: 40%;
+            float: left;
+            }
+
+            .added-elem {
+            width: 55%;
+            float: left;
+            margin-left: 10px;
+            margin-top: -15px;
+            }
+
+            div#outputJSON {
+            font-size: 14px;
+            line-height: 21px;
+            border: 1px solid #ccc;
+            background: #eaf2ff;
+            padding: 25px 15px;
+            word-break: break-word;
+            }
+
+            a.action-btn {
+            color: #000;
+            text-decoration: none;
+            border: 1px solid #ccc;
+            padding: 4px 10px;
+            display: inline-block;
+            background: #efefef;
+            float:right;
+            }
+
+            @media only screen and (max-width:768px) {
+                .input-group {
+                    width: 100%;
+                }
+                .btn-container {
+                    padding: 15px 10px;
+                }
+                .main-btn {
+                    width: 100%;
+                }
+                .added-elem {
+                    width: 100%;
+                    margin-left: 0;
+                    margin-top: 10px;
+                }
+                .add-input {
+                    width: 100%;
+                }
+                .outputWrapper {
+                    margin: 10px;
+                }
+            }
+
+        </style>
+
+	</head>
+	<body>
+
+		<div class="container">
+
+			<form name="jsonInputs" id="jsonInputs">
+
+				<div class="input-group">
+					<label for="jsonKey">JSON Key : <span class="hint">(Preferrable <b>camelCase</b> Names)</span></label>
+					<input type="text" id="jsonKey" />
+				</div>
+				
+				<div class="input-group">
+					<label for="jsonValueType">JSON Value Type:</label>
+					<select id="jsonValueType" onchange="typeChange();">
+						<option value="0">ANY</option>
+						<option value="1">NULL</option>
+						<option value="2">NUMBER</option>
+						<option value="3">STRING</option>
+						<option value="4">BOOLEAN</option>
+						<option value="5">OBJECT (JSON)</option>
+						<option value="6">ARRAY (Existing)</option>
+						<option value="7">ARRAY (Create New)</option>
+					</select>
+				</div>
+
+				<div class="input-group new-arr" id="newArrCreateBlock" style="display: none;">
+					<label for="arrElem">Array Element :</label>
+					<div class="add-input">
+						<input type="text" id="arrElem" /> 
+						<a href="javascript:;" class="btn" onclick="pushArrElem();">+</a>
+					</div>
+					<div class="added-elem">
+						<p class="hint">Double click on element to remove.</p>
+						<select class="new-arr-elements" name="newArrElements" id="newArrElements" multiple>
+							
+						</select>
+					</div>
+				</div>
+
+				<div class="input-group" id="valueBlock">
+					<label for="jsonValue">JSON Value :</label>
+					<input type="text" id="jsonValue" />
+				</div>
+
+				<div class="btn-container">
+					<button class="main-btn" type="button" onclick="buildJSON()">Generate</button>
+				</div>
+
+			</form>
+
+			<div class="outputWrapper" id="outputWrapper" style="display: none;">
+				<p class="hint">Duplicate KEY will overwrite the latest VALUE.</p>
+				<a class="action-btn" href="javascript:;" onclick="lineByLine()">Beautify</a>
+				<a class="action-btn" href="javascript:;" onclick="continuousObj()">Single Lined</a>
+				
+				<div class="outputJSON" id="outputJSON">
+					
+				</div>
+			</div>
+
+		</div>
+
+		<script type="text/javascript">
+			
+			var arr = [];
+			var typeArr = false;
+			var obj = {};
+			var valueTxt;
+			var keyTxt;
+			var typeCode = 0;
+			var originalOutput;
+
+			function typeChange(){
+
+				var typeSelect = document.getElementById("jsonValueType");
+				var selectedValue = typeSelect.value;
+  				var selectedType = typeSelect.options[typeSelect.selectedIndex].text;
+				var newArrCreateBlock = document.getElementById('newArrCreateBlock');
+				var valueBlock = document.getElementById('valueBlock');
+
+				if(selectedValue == 7){
+					typeArr = true;
+					newArrCreateBlock.style.display = 'block';
+					valueBlock.style.display = 'none';
+				} else {
+					typeArr = false;
+					newArrCreateBlock.style.display = 'none';
+					valueBlock.style.display = 'block';
+				}
+
+				typeCode = selectedValue;
+			}
+
+			function pushArrElem(){
+				var inputElem = document.getElementById('arrElem');
+				var txtToPush = inputElem.value;
+
+				arr.push(txtToPush);
+				inputElem.value = '';
+				inputElem.focus();
+
+				//Adding items to multiselect
+				var multiSelect = document.getElementById('newArrElements');
+				var opt = '<option ondblclick="deleteItem(this)">'+txtToPush+'</option>';
+				multiSelect.innerHTML = multiSelect.innerHTML + opt;
+			}
+
+			function deleteItem(elem){
+
+				var multiSelect = document.getElementById('newArrElements');
+				var listItems = multiSelect.options;
+				
+				elem.parentNode.removeChild(elem);
+
+				arr = []
+				for(var i=0;i<listItems.length;i++){
+					arr.push(listItems[i].text);
+				}
+				console.log(arr);
+
+			}
+
+			function buildJSON(){
+				keyTxt = document.getElementById("jsonKey").value;
+				if(typeArr){
+					valueTxt = arr;
+				} else{
+
+					valueTxt = document.getElementById("jsonValue").value;
+
+					if(typeCode==1){
+						valueTxt = null;
+					} else if(typeCode==2){
+						valueTxt = parseInt(valueTxt);
+					} else if(typeCode==3){
+						valueTxt = valueTxt.toString();
+					} else if(typeCode==4){
+						valueTxt = valueTxt.toLowerCase() == 'true' ? true : false;
+					} else if(typeCode==5){
+						valueTxt = valueTxt || {};
+					} else if(typeCode==6){
+						valueTxt = valueTxt || [];
+					} else{
+						var pattern = /^\d+$/;
+						if(valueTxt.length > 0){
+							if(pattern.test(valueTxt)){
+								valueTxt = parseInt(valueTxt);
+							} else{
+								try{
+									valueTxt = JSON.parse(valueTxt);
+								} catch(err){
+									valueTxt = valueTxt;
+								}
+							}
+						} else{
+							valueTxt = null;
+						}
+        				
+					}
+				}
+
+				if(keyTxt){
+					if( typeCode == 5 || typeCode == 6 ){
+						try{
+							obj[keyTxt] = JSON.parse(valueTxt) || valueTxt;
+						} catch(error){
+							var typeTxt = typeCode == 5 ? "JSON" : "ARRAY";
+							alert("Please enter a valid "+typeTxt+" Object.\n\nCheck console, highlighted error logged");
+							console.log('%cERROR (SELECTED TYPE -> '+typeTxt+') :\n'+error, 'background: #222; color: #bada55');
+							return false;
+						}
+					} else{
+						obj[keyTxt] = valueTxt;
+					}
+				} else {
+					alert('Please enter a valid JSON Key !');
+					return false;
+				}
+				
+				document.getElementById("jsonKey").value = '';
+				document.getElementById("jsonValue").value = '';
+				document.getElementById("newArrElements").innerHTML = '';
+				document.getElementById("jsonValueType").value = 0;
+				typeChange();
+				document.getElementById("jsonKey").focus();
+				document.getElementById('outputWrapper').style.display = 'block';
+				document.getElementById('outputJSON').innerHTML = JSON.stringify(obj);
+				originalOutput =  JSON.stringify(obj)
+
+			}
+
+			function lineByLine(){
+				var obj = document.getElementById('outputJSON').innerHTML;
+				var jsonOutput = obj.split(',"').join(',<br/>"');
+
+				jsonOutput = jsonOutput.split('{"').join('{ <br/>"');
+				jsonOutput = jsonOutput.split('}').join('<br/>}');
+
+				document.getElementById('outputJSON').innerHTML = jsonOutput;
+			}
+
+			function continuousObj(){
+				document.getElementById('outputJSON').innerHTML = originalOutput;
+			}
+		
+		</script>
+	</body>
+</html>
